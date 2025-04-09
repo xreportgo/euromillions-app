@@ -1,0 +1,5 @@
+::1 - - [07/Apr/2025:19:56:48 +0000] "GET /api HTTP/1.1" 200 99 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:19:56:53 +0000] "GET /favicon.ico HTTP/1.1" 404 30 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:19:57:13 +0000] "GET /api/draws HTTP/1.1" 200 36 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:19:57:43 +0000] "GET /api/draws/latest HTTP/1.1" 404 75 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:19:58:08 +0000] "GET /api/draws/statistics HTTP/1.1" 200 119 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"

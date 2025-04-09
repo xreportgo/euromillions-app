@@ -1,0 +1,40 @@
+[2025-04-07T19:55:47.730Z] [INFO] [database] Répertoire créé: C:\Users\Rga\euromillions-app\backend\db\db
+[2025-04-07T19:55:47.733Z] [INFO] [initDb] Démarrage de l'initialisation de la base de données
+[2025-04-07T19:55:47.734Z] [INFO] [scrapingService] Initialisation de la base de données avec l'historique des tirages
+[2025-04-07T19:55:47.735Z] [INFO] [database] Connecté à la base de données SQLite: C:\Users\Rga\euromillions-app\backend\db\db\euromillions.sqlite
+[2025-04-07T19:55:47.737Z] [ERROR] [database] Erreur SQL (get): SQLITE_ERROR: no such table: draws
+[2025-04-07T19:55:47.737Z] [ERROR] [database] Requête: SELECT COUNT(*) as count FROM draws
+[2025-04-07T19:55:47.738Z] [ERROR] [database] Paramètres: []
+[2025-04-07T19:55:47.739Z] [ERROR] [scrapingService] Erreur lors de l'initialisation de la base de données: SQLITE_ERROR: no such table: draws
+[2025-04-07T19:55:47.739Z] [ERROR] [initDb] Initialisation échouée: SQLITE_ERROR: no such table: draws
+[2025-04-07T19:55:47.749Z] [INFO] [database] Table statistics vérifiée/créée avec succès
+[2025-04-07T19:55:47.749Z] [INFO] [database] Table grids vérifiée/créée avec succès
+[2025-04-07T19:55:47.750Z] [INFO] [database] Table draws vérifiée/créée avec succès
+[2025-04-07T19:55:47.754Z] [INFO] [database] Connexion à la base de données fermée
+[2025-04-07T19:55:47.755Z] [INFO] [initDb] Initialisation terminée avec succès
+[2025-04-07T19:56:01.643Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-07T19:56:01.645Z] [INFO] [server] Environnement: development
+[2025-04-07T19:56:01.645Z] [INFO] [database] Connecté à la base de données SQLite: C:\Users\Rga\euromillions-app\backend\db\db\euromillions.sqlite
+[2025-04-07T19:56:01.647Z] [INFO] [database] Table draws vérifiée/créée avec succès
+[2025-04-07T19:56:01.648Z] [INFO] [database] Table grids vérifiée/créée avec succès
+[2025-04-07T19:56:01.648Z] [INFO] [database] Table statistics vérifiée/créée avec succès
+[2025-04-07T20:04:31.240Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-07T20:04:31.241Z] [INFO] [server] Environnement: development
+[2025-04-07T20:04:31.242Z] [INFO] [database] Connecté à la base de données SQLite: C:\Users\Rga\euromillions-app\backend\db\db\euromillions.sqlite
+[2025-04-07T20:04:31.244Z] [INFO] [database] Table draws vérifiée/créée avec succès
+[2025-04-07T20:04:31.245Z] [INFO] [database] Table grids vérifiée/créée avec succès
+[2025-04-07T20:04:31.245Z] [INFO] [database] Table statistics vérifiée/créée avec succès
+[2025-04-07T20:07:24.934Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-07T20:07:24.936Z] [INFO] [server] Environnement: development
+[2025-04-07T20:07:24.937Z] [INFO] [database] Connecté à la base de données SQLite: C:\Users\Rga\euromillions-app\backend\db\db\euromillions.sqlite
+[2025-04-07T20:07:24.940Z] [INFO] [database] Table draws vérifiée/créée avec succès
+[2025-04-07T20:07:24.940Z] [INFO] [database] Table grids vérifiée/créée avec succès
+[2025-04-07T20:07:24.941Z] [INFO] [database] Table statistics vérifiée/créée avec succès
+[2025-04-07T20:09:17.927Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-07T20:09:17.929Z] [INFO] [server] Environnement: development
+[2025-04-07T20:09:17.930Z] [INFO] [database] Connecté à la base de données SQLite: C:\Users\Rga\euromillions-app\backend\db\db\euromillions.sqlite
+[2025-04-07T20:09:17.932Z] [INFO] [database] Table draws vérifiée/créée avec succès
+[2025-04-07T20:09:17.932Z] [INFO] [database] Table grids vérifiée/créée avec succès
+[2025-04-07T20:09:17.933Z] [INFO] [database] Table statistics vérifiée/créée avec succès
+[2025-04-07T20:49:07.812Z] [INFO] [initDb] Démarrage de l'initialisation de la base de données
+[2025-04-07T20:49:07.814Z] [ERROR] [initDb] Erreur lors de l'initialisation: logger.error is not a function

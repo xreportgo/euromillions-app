@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EuroMillions App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #0057b7;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .card {
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .number-ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #0057b7;
+            color: white;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .star-ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ffcc00;
+            color: #333;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .tab-content {
+            padding: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background-color: #0057b7;
+            border-color: #0057b7;
+        }
+        .btn-primary:hover {
+            background-color: #003d82;
+            border-color: #003d82;
+        }
+        .stats-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .top-numbers, .top-stars {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #0057b7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EuroMillions App</h1>
+            <p>Analyse, génération et prédiction de grilles</p>
+        </div>
+
+        <ul class="nav nav-tabs" id="mainTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="draws-tab" data-bs-toggle="tab" data-bs-target="#draws" type="button" role="tab" aria-controls="draws" aria-selected="true">Tirages</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">Statistiques</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate" type="button" role="tab" aria-controls="generate" aria-selected="false">Générer une grille</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="predict-tab" data-bs-toggle="tab" data-bs-target="#predict" type="button" role="tab" aria-controls="predict" aria-selected="false">Prédiction</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="mainTabContent">
+            <!-- Tirages -->
+            <div class="tab-pane fade show active" id="draws" role="tabpanel" aria-labelledby="draws-tab">
+                <h2>Derniers tirages</h2>
+                <div id="latest-draw" class="card mb-4">
+                    <div class="card-header">Dernier tirage</div>
+                    <div class="card-body">
+                        <div class="loader" id="latest-draw-loader"></div>
+                        <div id="latest-draw-content" style="display: none;">
+                            <p><strong>Date:</strong> <span id="latest-draw-date"></span></p>
+                            <p><strong>Numéros:</strong> <span id="latest-draw-numbers"></span></p>
+                            <p><strong>Étoiles:</strong> <span id="latest-draw-stars"></span></p>
+                            <p><strong>Jackpot:</strong> <span id="latest-draw-jackpot"></span></p>
+                            <p><strong>Gagnants:</strong> <span id="latest-draw-winners"></span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Historique des tirages</h3>
+                <div id="draws-list">
+                    <div class="loader" id="draws-loader"></div>
+                    <div id="draws-content" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                <h2>Statistiques</h2>
+                
+                <div class="card mb-4">
+                    <div class="card-header">Fréquence d'apparition</div>
+                    <div class="card-body">
+                        <div class="loader" id="frequency-loader"></div>
+                        <div id="frequency-content" style="display: none;">
+                            <h4>Top 5 numéros les plus fréquents</h4>
+                            <div class="top-numbers" id="top-numbers"></div>
+                            
+                            <h4>Top 5 étoiles les plus fréquentes</h4>
+                            <div class="top-stars" id="top-stars"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">Statistiques de jackpot</div>
+                    <div class="card-body">
+                        <div class="loader" id="jackpot-loader"></div>
+                        <div id="jackpot-content" style="display: none;">
+                            <div id="jackpot-stats"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Génération de grille -->
+            <div class="tab-pane fade" id="generate" role="tabpanel" aria-labelledby="generate-tab">
+                <h2>Générer une grille</h2>
+                
+                <div class="card">
+                    <div class="card-header">Paramètres de génération</div>
+                    <div class="card-body">
+                        <form id="generate-form">
+                            <div class="form-group">
+                                <label for="generation-method">Méthode de génération:</label>
+                                <select class="form-control" id="generation-method">
+                                    <option value="random">Aléatoire</option>
+                                    <option value="frequency">Basée sur la fréquence</option>
+                                    <option value="rarity">Basée sur la rareté</option>
+                                    <option value="balanced">Équilibrée</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Générer</button>
+                        </form>
+                        
+                        <div id="generated-grid" style="display: none;">
+                            <h3 class="mt-4">Grille générée</h3>
+                            <div class="loader" id="generate-loader" style="display: none;"></div>
+                            <div id="generate-content">
+                                <p><strong>Numéros:</strong> <span id="generated-numbers"></span></p>
+                                <p><strong>Étoiles:</strong> <span id="generated-stars"></span></p>
+                                <p><strong>Méthode:</strong> <span id="generated-method"></span></p>
+                                <p><strong>Indice de confiance:</strong> <span id="generated-confidence"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Prédiction -->
+            <div class="tab-pane fade" id="predict" role="tabpanel" aria-labelledby="predict-tab">
+                <h2>Prédiction du prochain tirage</h2>
+                
+                <div class="card">
+                    <div class="card-header">Paramètres de prédiction</div>
+                    <div class="card-body">
+                        <form id="prediction-form">
+                            <div class="form-group">
+                                <label for="prediction-method">Méthode de prédiction:</label>
+                                <select class="form-control" id="prediction-method">
+                                    <option value="frequency">Basée sur la fréquence</option>
+                                    <option value="rarity">Basée sur la rareté</option>
+                                    <option value="pattern">Basée sur les patterns</option>
+                                    <option value="random">Aléatoire</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Prédire</button>
+                        </form>
+                        
+                        <div id="prediction-result" style="display: none;">
+                            <h3 class="mt-4">Prédiction</h3>
+                            <div class="loader" id="prediction-loader" style="display: none;"></div>
+                            <div id="prediction-content">
+                                <p><strong>Date du prochain tirage:</strong> <span id="prediction-date"></span></p>
+                                <p><strong>Numéros prédits:</strong> <span id="prediction-numbers"></span></p>
+                                <p><strong>Étoiles prédites:</strong> <span id="prediction-stars"></span></p>
+                                <p><strong>Méthode:</strong> <span id="prediction-method-display"></span></p>
+                                <p><strong>Indice de confiance:</strong> <span id="prediction-confidence"></span></p>
+                                <p><strong>Explication:</strong> <span id="prediction-explanation"></span></p>
+                                <div class="alert alert-warning mt-3">
+                                    <strong>Avertissement:</strong> Les prédictions sont basées sur des analyses statistiques et ne garantissent pas de gains.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration de l'API
+        const API_URL = 'http://localhost:3000/api';
+        
+        // Fonction pour créer des éléments de numéros et d'étoiles
+        function createBalls(numbers, stars) {
+            let html = '';
+            
+            // Numéros
+            numbers.forEach(num => {
+                html += `<span class="number-ball">${num}</span>`;
+            });
+            
+            html += ' &nbsp; ';
+            
+            // Étoiles
+            stars.forEach(star => {
+                html += `<span class="star-ball">${star}</span>`;
+            });
+            
+            return html;
+        }
+        
+        // Fonction pour formater un montant
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('fr-FR', { 
+                style: 'currency', 
+                currency: 'EUR',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Fonction pour formater une date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('fr-FR', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            }).format(date);
+        }
+        
+        // Chargement du dernier tirage
+        function loadLatestDraw() {
+            document.getElementById('latest-draw-loader').style.display = 'block';
+            document.getElementById('latest-draw-content').style.display = 'none';
+            
+            fetch(`${API_URL}/draws/latest`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('latest-draw-date').textContent = formatDate(data.date);
+                    document.getElementById('latest-draw-numbers').innerHTML = createBalls(data.numbers, []);
+                    document.getElementById('latest-draw-stars').innerHTML = createBalls([], data.stars);
+                    document.getElementById('latest-draw-jackpot').textContent = formatMoney(data.jackpot);
+                    document.getElementById('latest-draw-winners').textContent = data.winners > 0 ? data.winners : 'Aucun';
+                    
+                    document.getElementById('latest-draw-loader').style.display = 'none';
+                    document.getElementById('latest-draw-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement du dernier tirage:', error);
+                    document.getElementById('latest-draw-loader').style.display = 'none';
+                    document.getElementById('latest-draw-content').innerHTML = '<div class="alert alert-danger">Erreur lors du chargement du dernier tirage</div>';
+                    document.getElementById('latest-draw-content').style.display = 'block';
+                });
+        }
+        
+        // Chargement de l'historique des tirages
+        function loadDrawsHistory() {
+            document.getElementById('draws-loader').style.display = 'block';
+            document.getElementById('draws-content').style.display = 'none';
+            
+            fetch(`${API_URL}/draws`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = '<div class="list-group">';
+                    
+                    data.draws.forEach(draw => {
+                        html += `
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">${formatDate(draw.date)}</h5>
+                                    <small>${formatMoney(draw.jackpot)}</small>
+                                </div>
+                                <p class="mb-1">
+                                    ${createBalls(draw.numbers, draw.stars)}
+                                </p>
+                                <small>Gagnants: ${draw.winners > 0 ? draw.winners : 'Aucun'}</small>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    
+                    document.getElementById('draws-content').innerHTML = html;
+                    document.getElementById('draws-loader').style.display = 'none';
+                    document.getElementById('draws-content').style.display = 'block';
+					                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des tirages:', error);
+                    document.getElementById('draws-loader').style.display = 'none';
+                    document.getElementById('draws-content').innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des tirages</div>';
+                    document.getElementById('draws-content').style.display = 'block';
+                });
+        }
+        
+        // Chargement des statistiques de fréquence
+        function loadFrequencyStats() {
+            document.getElementById('frequency-loader').style.display = 'block';
+            document.getElementById('frequency-content').style.display = 'none';
+            
+            fetch(`${API_URL}/stats/frequency`)
+                .then(response => response.json())
+                .then(data => {
+                    let numbersHtml = '';
+                    let starsHtml = '';
+                    
+                    // Top 5 numéros
+                    data.numbers.slice(0, 5).forEach(item => {
+                        numbersHtml += `
+                            <div class="stats-item">
+                                <span class="number-ball">${item.number}</span>
+                                <div>
+                                    <div>Fréquence: ${item.count} fois</div>
+                                    <div>Pourcentage: ${item.percentage}%</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    // Top 5 étoiles
+                    data.stars.slice(0, 5).forEach(item => {
+                        starsHtml += `
+                            <div class="stats-item">
+                                <span class="star-ball">${item.star}</span>
+                                <div>
+                                    <div>Fréquence: ${item.count} fois</div>
+                                    <div>Pourcentage: ${item.percentage}%</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('top-numbers').innerHTML = numbersHtml;
+                    document.getElementById('top-stars').innerHTML = starsHtml;
+                    
+                    document.getElementById('frequency-loader').style.display = 'none';
+                    document.getElementById('frequency-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des statistiques de fréquence:', error);
+                    document.getElementById('frequency-loader').style.display = 'none';
+                    document.getElementById('frequency-content').innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des statistiques</div>';
+                    document.getElementById('frequency-content').style.display = 'block';
+                });
+        }
+        
+        // Chargement des statistiques de jackpot
+        function loadJackpotStats() {
+            document.getElementById('jackpot-loader').style.display = 'block';
+            document.getElementById('jackpot-content').style.display = 'none';
+            
+            fetch(`${API_URL}/stats/jackpot`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="stats-item">
+                                    <h5>Tirages totaux</h5>
+                                    <p>${data.totalDraws}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stats-item">
+                                    <h5>Jackpots gagnés</h5>
+                                    <p>${data.jackpotWon} (${data.jackpotWonPercentage}%)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stats-item">
+                                    <h5>Jackpot moyen</h5>
+                                    <p>${formatMoney(data.averageJackpot)}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stats-item">
+                                    <h5>Jackpot médian</h5>
+                                    <p>${formatMoney(data.medianJackpot)}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="stats-item">
+                                    <h5>Jackpot maximum</h5>
+                                    <p>${formatMoney(data.maxJackpot)} (${formatDate(data.maxJackpotDate)})</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('jackpot-stats').innerHTML = html;
+                    document.getElementById('jackpot-loader').style.display = 'none';
+                    document.getElementById('jackpot-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des statistiques de jackpot:', error);
+                    document.getElementById('jackpot-loader').style.display = 'none';
+                    document.getElementById('jackpot-content').innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des statistiques</div>';
+                    document.getElementById('jackpot-content').style.display = 'block';
+                });
+        }
+        
+        // Générer une grille
+        function generateGrid(method) {
+            document.getElementById('generate-loader').style.display = 'block';
+            document.getElementById('generate-content').style.display = 'none';
+            
+            fetch(`${API_URL}/grids/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    method
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const grid = data.grid;
+                    document.getElementById('generated-numbers').innerHTML = createBalls(grid.numbers, []);
+                    document.getElementById('generated-stars').innerHTML = createBalls([], grid.stars);
+                    document.getElementById('generated-method').textContent = getMethodName(data.method);
+                    document.getElementById('generated-confidence').textContent = (data.confidenceScore * 100).toFixed(0) + '%';
+                    
+                    document.getElementById('generated-grid').style.display = 'block';
+                    document.getElementById('generate-loader').style.display = 'none';
+                    document.getElementById('generate-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la génération de la grille:', error);
+                    document.getElementById('generate-loader').style.display = 'none';
+                    document.getElementById('generate-content').innerHTML = '<div class="alert alert-danger">Erreur lors de la génération de la grille</div>';
+                    document.getElementById('generate-content').style.display = 'block';
+                });
+        }
+        
+        // Faire une prédiction
+        function predictNextDraw(method) {
+            document.getElementById('prediction-loader').style.display = 'block';
+            document.getElementById('prediction-content').style.display = 'none';
+            
+            fetch(`${API_URL}/predictions?method=${method}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('prediction-date').textContent = formatDate(data.prediction.date);
+                    document.getElementById('prediction-numbers').innerHTML = createBalls(data.prediction.numbers, []);
+                    document.getElementById('prediction-stars').innerHTML = createBalls([], data.prediction.stars);
+                    document.getElementById('prediction-method-display').textContent = getMethodName(data.method);
+                    document.getElementById('prediction-confidence').textContent = (data.confidenceScore * 100).toFixed(0) + '%';
+                    document.getElementById('prediction-explanation').textContent = data.explanation;
+                    
+                    document.getElementById('prediction-result').style.display = 'block';
+                    document.getElementById('prediction-loader').style.display = 'none';
+                    document.getElementById('prediction-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la prédiction:', error);
+                    document.getElementById('prediction-loader').style.display = 'none';
+                    document.getElementById('prediction-content').innerHTML = '<div class="alert alert-danger">Erreur lors de la prédiction</div>';
+                    document.getElementById('prediction-content').style.display = 'block';
+                });
+        }
+        
+        // Obtenir le nom lisible d'une méthode
+        function getMethodName(method) {
+            switch (method) {
+                case 'random':
+                    return 'Aléatoire';
+                case 'frequency':
+                    return 'Basée sur la fréquence';
+                case 'rarity':
+                    return 'Basée sur la rareté';
+                case 'balanced':
+                    return 'Équilibrée';
+                case 'pattern':
+                    return 'Basée sur les patterns';
+                default:
+                    return method;
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chargement initial des données
+            loadLatestDraw();
+            loadDrawsHistory();
+            
+            // Gestion des onglets
+            document.getElementById('stats-tab').addEventListener('click', function() {
+                loadFrequencyStats();
+                loadJackpotStats();
+            });
+            
+            // Formulaire de génération de grille
+            document.getElementById('generate-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const method = document.getElementById('generation-method').value;
+                generateGrid(method);
+            });
+            
+            // Formulaire de prédiction
+            document.getElementById('prediction-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const method = document.getElementById('prediction-method').value;
+                predictNextDraw(method);
+            });
+        });
+    </script>
+</body>
+</html>

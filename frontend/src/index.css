@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #1a56db;
+  --primary-dark: #1e429f;
+  --secondary: #f59e0b;
+  --text-dark: #374151;
+  --text-light: #6b7280;
+  --background-light: #f5f7fa;
+  --background-white: #ffffff;
+  --success: #059669;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --info: #2563eb;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-light);
+  color: var(--text-dark);
+}
+
+.lottery-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f1f9 100%);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-weight: bold;
+  margin: 0 5px;
+  color: var(--text-dark);
+}
+
+.lottery-ball.star {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+}
+
+.lottery-ball.selected {
+  background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);
+  color: #1e40af;
+}
+
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+}
+
+.dark-theme {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --text-dark: #f3f4f6;
+  --text-light: #d1d5db;
+  --background-light: #1f2937;
+  --background-white: #111827;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme) {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --text-dark: #f3f4f6;
+    --text-light: #d1d5db;
+    --background-light: #1f2937;
+    --background-white: #111827;
+  }
+}
