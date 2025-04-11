@@ -1,0 +1,10 @@
+[2025-04-10T01:01:21.259Z] [ERROR] Erreur lors de l'initialisation de la table des grilles: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:01:21.260Z] [ERROR] Erreur d'initialisation: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:15:27.663Z] [ERROR] Erreur lors de l'initialisation de la table des grilles: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:15:27.663Z] [ERROR] Erreur d'initialisation: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:28:44.483Z] [ERROR] Erreur d'initialisation: fs is not defined
+[2025-04-10T01:28:44.484Z] [ERROR] Erreur lors de l'initialisation de la table des grilles: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:28:44.484Z] [ERROR] Erreur d'initialisation: SQLITE_CANTOPEN: unable to open database file
+2025-04-11 00:50:16 [error]: ERREUR 404: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html' Error: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html'
+2025-04-11 00:50:17 [error]: ERREUR 404: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html' Error: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html'
+2025-04-11 00:50:17 [error]: ERREUR 404: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html' Error: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html'

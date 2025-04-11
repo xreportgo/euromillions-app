@@ -1,351 +1,365 @@
-// pages/SavedGrids.js
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchSavedGrids, deleteGrid, updateGridName } from '../redux/actions/gridActions';
-import LotteryBall from '../components/common/LotteryBall';
-import { printGrid, exportGrids } from '../services/gridService';
-import { Link } from 'react-router-dom';
-import toast from '../utils/toast';
+// src/pages/SavedGrids.js
+import React, { useState, useEffect } from 'react';
+import { getStoredGrids, deleteGrid, saveGrid } from '../services/gridService';
+import { toast } from 'react-toastify';
 
 const SavedGrids = () => {
-  const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const { savedGrids, loading, error } = useSelector(state => state.grids);
-  const [editingId, setEditingId] = useState(null);
-  const [newName, setNewName] = useState('');
-  const [selectedGrids, setSelectedGrids] = useState([]);
+  const [grids, setGrids] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
   
+  // États du formulaire
+  const [gridName, setGridName] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedNumbers, setSelectedNumbers] = useState([]);
+  const [selectedStars, setSelectedStars] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  // Charger les grilles au chargement de la page
   useEffect(() => {
-    dispatch(fetchSavedGrids());
-  }, [dispatch]);
-  
-  const handleSelectGrid = (id) => {
-    if (selectedGrids.includes(id)) {
-      setSelectedGrids(selectedGrids.filter(gridId => gridId !== id));
-    } else {
-      setSelectedGrids([...selectedGrids, id]);
+    fetchGrids();
+  }, []);
+
+  // Réinitialiser formSubmitted après un certain temps
+  useEffect(() => {
+    if (formSubmitted) {
+      const timer = setTimeout(() => {
+        setFormSubmitted(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
     }
-  };
-  
-  const handleSelectAll = () => {
-    if (selectedGrids.length === savedGrids.length) {
-      setSelectedGrids([]);
-    } else {
-      setSelectedGrids(savedGrids.map(grid => grid._id));
-    }
-  };
-  
-  const handlePrint = (grid) => {
-    printGrid(grid);
-  };
-  
-  const handleEdit = (grid) => {
-    setEditingId(grid._id);
-    setNewName(grid.name);
-  };
-  
-  const handleSaveEdit = async () => {
-    if (editingId && newName.trim()) {
-      try {
-        await dispatch(updateGridName(editingId, newName.trim()));
-        setEditingId(null);
-        setNewName('');
-      } catch (error) {
-        console.error('Error updating grid name:', error);
-      }
-    }
-  };
-  
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setNewName('');
-  };
-  
-  const handleDelete = async (id) => {
-    if (window.confirm(t('confirmDeleteGrid'))) {
-      try {
-        await dispatch(deleteGrid(id));
-      } catch (error) {
-        console.error('Error deleting grid:', error);
-      }
-    }
-  };
-  
-  const handleDeleteSelected = async () => {
-    if (selectedGrids.length === 0) return;
-    
-    if (window.confirm(t('confirmDeleteSelectedGrids', { count: selectedGrids.length }))) {
-      try {
-        // Delete grids one by one
-        for (const id of selectedGrids) {
-          await dispatch(deleteGrid(id));
-        }
-        setSelectedGrids([]);
-      } catch (error) {
-        console.error('Error deleting selected grids:', error);
-      }
-    }
-  };
-  
-  const handleExport = async (format) => {
+  }, [formSubmitted]);
+
+  const fetchGrids = async () => {
+    setLoading(true);
     try {
-      const ids = selectedGrids.length > 0 ? selectedGrids : null;
-      const response = await exportGrids(format, ids);
+      const storedGrids = await getStoredGrids();
+      setGrids(storedGrids || []);
+      setError(null);
+    } catch (err) {
+      console.error('Erreur lors du chargement des grilles:', err);
+      setError('Impossible de charger vos grilles sauvegardées');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateGrid = () => {
+    // Réinitialiser le formulaire
+    setGridName('');
+    setDescription('');
+    setSelectedNumbers([]);
+    setSelectedStars([]);
+    setFormError(null);
+    
+    // Afficher le formulaire
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+  };
+
+  const handleDeleteGrid = async (gridId) => {
+    try {
+      await deleteGrid(gridId);
+      toast.success('Grille supprimée avec succès');
+      fetchGrids(); // Actualiser la liste
+    } catch (err) {
+      console.error('Erreur lors de la suppression de la grille:', err);
+      toast.error('Erreur lors de la suppression de la grille');
+    }
+  };
+
+  const handleNumberSelect = (number) => {
+    if (selectedNumbers.includes(number)) {
+      setSelectedNumbers(selectedNumbers.filter(n => n !== number));
+    } else if (selectedNumbers.length < 5) {
+      setSelectedNumbers([...selectedNumbers, number].sort((a, b) => a - b));
+    } else {
+      toast.warning('Vous ne pouvez sélectionner que 5 numéros');
+    }
+  };
+
+  const handleStarSelect = (star) => {
+    if (selectedStars.includes(star)) {
+      setSelectedStars(selectedStars.filter(s => s !== star));
+    } else if (selectedStars.length < 2) {
+      setSelectedStars([...selectedStars, star].sort((a, b) => a - b));
+    } else {
+      toast.warning('Vous ne pouvez sélectionner que 2 étoiles');
+    }
+  };
+
+  const generateRandomGrid = () => {
+    // Générer 5 nombres aléatoires (1-50) sans doublons
+    const allNumbers = Array.from({ length: 50 }, (_, i) => i + 1);
+    const numbers = [];
+    for (let i = 0; i < 5; i++) {
+      const randomIndex = Math.floor(Math.random() * allNumbers.length);
+      numbers.push(allNumbers[randomIndex]);
+      allNumbers.splice(randomIndex, 1);
+    }
+    
+    // Générer 2 étoiles aléatoires (1-12) sans doublons
+    const allStars = Array.from({ length: 12 }, (_, i) => i + 1);
+    const stars = [];
+    for (let i = 0; i < 2; i++) {
+      const randomIndex = Math.floor(Math.random() * allStars.length);
+      stars.push(allStars[randomIndex]);
+      allStars.splice(randomIndex, 1);
+    }
+    
+    // Trier les nombres et étoiles
+    setSelectedNumbers(numbers.sort((a, b) => a - b));
+    setSelectedStars(stars.sort((a, b) => a - b));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setFormError(null);
+    
+    // Validation
+    if (selectedNumbers.length !== 5) {
+      setFormError('Veuillez sélectionner 5 numéros');
+      return;
+    }
+    
+    if (selectedStars.length !== 2) {
+      setFormError('Veuillez sélectionner 2 étoiles');
+      return;
+    }
+    
+    setSaving(true);
+    
+    try {
+      const newGrid = {
+        name: gridName.trim() || `Grille du ${new Date().toLocaleDateString()}`,
+        description: description.trim(),
+        numbers: selectedNumbers,
+        stars: selectedStars,
+        createdAt: new Date().toISOString()
+      };
       
-      // Create a download link
-      const url = window.URL.createObjectURL(new Blob([response]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `grilles-euromillions.${format}`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error exporting grids:', error);
+      console.log('Données de la grille à sauvegarder:', newGrid);
+      
+      await saveGrid(newGrid);
+      toast.success('Grille sauvegardée avec succès !');
+      
+      // Fermer le formulaire et indiquer qu'il a été soumis
+      setShowForm(false);
+      setFormSubmitted(true);
+      
+      // Recharger les grilles
+      fetchGrids();
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde de la grille:', err);
+      setFormError('Erreur lors de la sauvegarde de la grille');
+      toast.error('Erreur lors de la sauvegarde de la grille');
+    } finally {
+      setSaving(false);
     }
   };
-  
-  const handlePrintSelected = () => {
-    if (selectedGrids.length === 0) return;
-    
-    // Print each selected grid
-    const selectedGridObjects = savedGrids.filter(grid => 
-      selectedGrids.includes(grid._id)
-    );
-    
-    for (const grid of selectedGridObjects) {
-      printGrid(grid);
-    }
+
+  // Générer les boutons de numéros (1-50)
+  const renderNumberButtons = () => {
+    return Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
+      <button
+        key={`number-${num}`}
+        className={`number-button ${selectedNumbers.includes(num) ? 'selected' : ''}`}
+        onClick={() => handleNumberSelect(num)}
+        type="button"
+      >
+        {num}
+      </button>
+    ));
   };
-  
-  if (loading && savedGrids.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">{t('savedGrids')}</h1>
-        <div className="text-center py-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4">{t('loading')}</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (error && savedGrids.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">{t('savedGrids')}</h1>
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{t('errorLoadingGrids')}: {error}</p>
-          <button 
-            className="mt-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-            onClick={() => dispatch(fetchSavedGrids())}
-          >
-            {t('tryAgain')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
+
+  // Générer les boutons d'étoiles (1-12)
+  const renderStarButtons = () => {
+    return Array.from({ length: 12 }, (_, i) => i + 1).map(star => (
+      <button
+        key={`star-${star}`}
+        className={`star-button ${selectedStars.includes(star) ? 'selected' : ''}`}
+        onClick={() => handleStarSelect(star)}
+        type="button"
+      >
+        {star}
+      </button>
+    ));
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{t('savedGrids')}</h1>
+    <div className="container">
+      <h1 className="text-center">Mes Grilles</h1>
+      <p className="text-center">Gérez vos grilles EuroMillions sauvegardées et créez-en de nouvelles.</p>
       
-      {/* Actions toolbar */}
-      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6 flex flex-wrap items-center gap-3">
-        <button
-          onClick={handleSelectAll}
-          className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-        >
-          {selectedGrids.length === savedGrids.length ? t('deselectAll') : t('selectAll')}
-        </button>
-        
-        <div className="h-6 border-l border-gray-300 dark:border-gray-600"></div>
-        
-        <button
-          onClick={handlePrintSelected}
-          disabled={selectedGrids.length === 0}
-          className={`px-3 py-1 text-sm rounded ${
-            selectedGrids.length === 0 
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-              : 'bg-green-500 text-white hover:bg-green-600'
-          }`}
-        >
-          {t('printSelected')}
-        </button>
-        
-        <button
-          onClick={handleDeleteSelected}
-          disabled={selectedGrids.length === 0}
-          className={`px-3 py-1 text-sm rounded ${
-            selectedGrids.length === 0 
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-              : 'bg-red-500 text-white hover:bg-red-600'
-          }`}
-        >
-          {t('deleteSelected')}
-        </button>
-        
-        <div className="h-6 border-l border-gray-300 dark:border-gray-600"></div>
-        
-        <div className="relative group">
-          <button
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+      {/* Message d'erreur */}
+      {error && (
+        <div className="error-alert">
+          {error}
+          <button 
+            style={{marginLeft: '20px', padding: '5px 10px', border: 'none', background: '#c62828', color: 'white', borderRadius: '4px', cursor: 'pointer'}}
+            onClick={fetchGrids}
           >
-            {t('export')}
+            Réessayer
           </button>
-          <div className="absolute hidden group-hover:block mt-1 w-32 bg-white dark:bg-gray-800 shadow-lg rounded z-10">
-            <button 
-              onClick={() => handleExport('csv')}
-              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              CSV
-            </button>
-            <button 
-              onClick={() => handleExport('json')}
-              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              JSON
-            </button>
-          </div>
         </div>
-        
-        <div className="ml-auto">
-          <Link 
-            to="/generate"
-            className="px-3 py-1 text-sm bg-purple-500 text-white rounded hover:bg-purple-600"
-          >
-            {t('generateNewGrids')}
-          </Link>
+      )}
+      
+      {/* Message de succès */}
+      {formSubmitted && (
+        <div className="success-alert">
+          Grille sauvegardée avec succès !
         </div>
+      )}
+      
+      {/* Bouton de création de grille */}
+      <div className="text-center">
+        <button 
+          className="create-button"
+          onClick={handleCreateGrid}
+          disabled={loading}
+        >
+          Créer une nouvelle grille
+        </button>
       </div>
       
-      {savedGrids.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">{t('noSavedGrids')}</h3>
-          <p className="mt-1 text-gray-500 dark:text-gray-400">{t('startBySavingGrids')}</p>
-          <div className="mt-6">
-            <Link
-              to="/generate"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-            >
-              {t('generateGrids')}
-            </Link>
+      {/* Formulaire de création de grille */}
+      {showForm && (
+        <div className="grid-form">
+          <div className="form-header">
+            <div className="form-title">Créer une nouvelle grille</div>
+            <button className="close-button" onClick={handleFormClose}>✕</button>
           </div>
+          
+          <div className="form-divider"></div>
+          
+          <form onSubmit={handleFormSubmit}>
+            <div className="form-row">
+              <div className="form-field">
+                <label className="form-label">Nom de la grille (optionnel)</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Ex: Ma grille porte-bonheur"
+                  value={gridName}
+                  onChange={(e) => setGridName(e.target.value)}
+                />
+              </div>
+              
+              <div className="form-field">
+                <label className="form-label">Description (optionnel)</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Une description pour votre grille"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="form-section-title">
+              <h3>Sélectionnez vos numéros</h3>
+              <button 
+                className="refresh-button" 
+                title="Générer une grille aléatoire"
+                type="button"
+                onClick={generateRandomGrid}
+              >
+                🔄
+              </button>
+            </div>
+            
+            <p>Sélectionnez 5 numéros (1-50) et 2 étoiles (1-12)</p>
+            
+            <h4>Numéros</h4>
+            <div className="numbers-grid">
+              {renderNumberButtons()}
+            </div>
+            
+            <h4>Étoiles</h4>
+            <div className="stars-grid">
+              {renderStarButtons()}
+            </div>
+            
+            {formError && (
+              <div className="error-text">{formError}</div>
+            )}
+            
+            <div className="form-actions">
+              <button 
+                className="cancel-button"
+                type="button"
+                onClick={handleFormClose}
+                disabled={saving}
+              >
+                Annuler
+              </button>
+              
+              <button 
+                className="save-button"
+                type="submit"
+                disabled={saving || selectedNumbers.length !== 5 || selectedStars.length !== 2}
+              >
+                {saving ? 'Sauvegarde...' : 'Sauvegarder la grille'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      
+      {/* Affichage des grilles */}
+      {loading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Chargement de vos grilles...</p>
+        </div>
+      ) : grids.length === 0 ? (
+        <div className="empty-state">
+          <h3>Vous n'avez pas encore de grilles sauvegardées.</h3>
+          <p>Créez votre première grille en cliquant sur le bouton ci-dessus.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {savedGrids.map(grid => (
-            <div 
-              key={grid._id} 
-              className={`border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
-                selectedGrids.includes(grid._id) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              <div className="p-4">
-                <div className="flex items-center mb-3">
-                  <input 
-                    type="checkbox"
-                    checked={selectedGrids.includes(grid._id)}
-                    onChange={() => handleSelectGrid(grid._id)}
-                    className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                  />
-                  
-                  {editingId === grid._id ? (
-                    <div className="ml-2 flex-1 flex">
-                      <input
-                        type="text"
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        className="flex-1 border-gray-300 rounded text-sm p-1"
-                        autoFocus
-                      />
-                      <button 
-                        onClick={handleSaveEdit}
-                        className="ml-1 text-green-500 hover:text-green-600"
-                      >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </button>
-                      <button 
-                        onClick={handleCancelEdit}
-                        className="ml-1 text-red-500 hover:text-red-600"
-                      >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ) : (
-                    <h3 className="ml-2 text-lg font-medium flex-1 truncate">
-                      {grid.name || t('unnamedGrid')}
-                      <button 
-                        onClick={() => handleEdit(grid)}
-                        className="ml-1 text-gray-500 hover:text-blue-500 inline-block"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </button>
-                    </h3>
-                  )}
+        <>
+          <h2>Mes Grilles Sauvegardées</h2>
+          <div className="grids-container">
+            {grids.map(grid => (
+              <div className="grid-card" key={grid.id}>
+                <h3>{grid.name || `Grille #${grid.id.substring(0, 8)}`}</h3>
+                <div className="grid-date">
+                  Créée le: {new Date(grid.createdAt).toLocaleDateString()}
                 </div>
                 
-                <div className="flex justify-center my-3 flex-wrap">
-                  {grid.numbers.map(number => (
-                    <LotteryBall 
-                      key={`number-${number}`} 
-                      number={number} 
-                      type="number"
-                      className="m-1"
-                    />
+                <div className="mini-numbers">
+                  {grid.numbers.map(num => (
+                    <div className="mini-number" key={`grid-${grid.id}-num-${num}`}>{num}</div>
                   ))}
-                  <span className="mx-2 self-center">+</span>
+                </div>
+                <div className="mini-numbers">
                   {grid.stars.map(star => (
-                    <LotteryBall 
-                      key={`star-${star}`} 
-                      number={star} 
-                      type="star"
-                      className="m-1"
-                    />
+                    <div className="mini-star" key={`grid-${grid.id}-star-${star}`}>{star}</div>
                   ))}
                 </div>
                 
-                {grid.method && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    {t('generatedUsing')}: {t(grid.method)}
-                  </div>
-                )}
-                
-                {grid.confidence > 0 && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {t('confidence')}: {Math.round(grid.confidence * 100)}%
-                  </div>
-                )}
-                
-                <div className="mt-4 flex justify-between gap-2">
-                  <button
-                    onClick={() => handlePrint(grid)}
-                    className="flex-1 px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                <div className="grid-actions">
+                  <button className="grid-button view-button">Détails</button>
+                  <button 
+                    className="grid-button delete-button"
+                    onClick={() => handleDeleteGrid(grid.id)}
                   >
-                    {t('print')}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(grid._id)}
-                    className="flex-1 px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    {t('delete')}
+                    Supprimer
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

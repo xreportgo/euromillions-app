@@ -40,3 +40,81 @@
 [2025-04-09T09:29:33.388Z] [INFO] [server] Mode: development
 [2025-04-09T09:30:35.189Z] [INFO] [server] Serveur démarré sur le port 3000
 [2025-04-09T09:30:35.191Z] [INFO] [server] Mode: development
+[2025-04-09T18:03:19.607Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-09T18:03:19.610Z] [INFO] [server] Mode: development
+[2025-04-09T23:48:59.787Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-09T23:48:59.789Z] [INFO] [server] Mode: development
+[2025-04-10T00:06:39.000Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T00:06:39.004Z] [INFO] [server] Mode: development
+[2025-04-10T00:08:04.635Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T00:08:04.638Z] [INFO] [server] Mode: development
+[2025-04-10T00:12:14.038Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T00:12:14.041Z] [INFO] [server] Mode: development
+[2025-04-10T00:16:38.751Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T00:16:38.753Z] [INFO] [server] Mode: development
+[2025-04-10T00:24:28.952Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T00:24:28.954Z] [INFO] [server] Mode: development
+[2025-04-10T01:01:21.255Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T01:01:21.258Z] [INFO] [server] Mode: development
+[2025-04-10T01:15:27.658Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T01:15:27.661Z] [INFO] [server] Mode: development
+[2025-04-10T01:28:44.480Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T01:28:44.482Z] [INFO] [server] Mode: development
+[2025-04-10T01:33:13.040Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T01:33:13.043Z] [INFO] [server] Mode: development
+[2025-04-10T01:53:30.657Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T01:53:30.659Z] [INFO] [server] Mode: development
+[2025-04-10T02:04:53.091Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T02:04:53.094Z] [INFO] [server] Mode: development
+[2025-04-10T02:07:39.625Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T02:07:39.628Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T02:09:56.687Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T02:09:56.689Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T02:10:49.517Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T02:10:49.519Z] [INFO] [server] Mode: development
+[2025-04-10T02:11:49.447Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T02:11:49.458Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T02:13:28.145Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T02:13:56.058Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T02:13:56.059Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T02:14:05.634Z] [ERROR] [server] Erreur: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T02:16:04.056Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T02:16:04.058Z] [INFO] [server] Mode: development
+[2025-04-10T12:51:58.222Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T12:51:58.225Z] [INFO] [server] Mode: development
+[2025-04-10T13:34:59.089Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T13:34:59.091Z] [INFO] [server] Mode: development
+[2025-04-10T13:39:43.267Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T13:39:43.269Z] [INFO] [server] Mode: development
+[2025-04-10T13:44:57.334Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T13:44:57.336Z] [INFO] [server] Mode: development
+[2025-04-10T13:48:32.023Z] [INFO] [server] Serveur démarré sur le port 3000
+[2025-04-10T13:48:32.025Z] [INFO] [server] Mode: development
+[2025-04-10T14:17:34.057Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T14:17:34.058Z] [INFO] [server] Mode: development
+[2025-04-10T15:49:38.506Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T15:49:38.508Z] [INFO] [server] Mode: development
+[2025-04-10T15:59:27.862Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T15:59:27.863Z] [INFO] [server] Mode: development
+[2025-04-10T16:34:27.638Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T16:34:27.640Z] [INFO] [server] Mode: development
+[2025-04-10T16:44:49.342Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T16:44:49.343Z] [INFO] [server] Mode: development
+[2025-04-10T16:49:24.355Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T16:49:24.357Z] [INFO] [server] Mode: development
+[2025-04-10T17:01:58.992Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T17:01:58.994Z] [INFO] [server] Mode: development
+[2025-04-10T17:02:09.577Z] [ERROR] [server] URIError: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T17:02:09.581Z] [ERROR] [server] URIError: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T17:02:27.453Z] [ERROR] [server] URIError: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T17:02:34.174Z] [ERROR] [server] URIError: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T17:02:40.191Z] [ERROR] [server] URIError: Failed to decode param '/%PUBLIC_URL%/favicon.ico'
+[2025-04-10T17:03:21.382Z] [ERROR] [server] URIError: Failed to decode param '/%PUBLIC_URL%/manifest.json'
+[2025-04-10T19:28:53.441Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T19:28:53.443Z] [INFO] [server] Mode: development
+[2025-04-10T19:41:48.204Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T19:41:48.206Z] [INFO] [server] Mode: development
+[2025-04-10T20:13:34.224Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T20:13:34.227Z] [INFO] [server] Mode: development
+[2025-04-10T20:21:45.977Z] [INFO] [server] Serveur démarré sur le port 5000
+[2025-04-10T20:21:45.979Z] [INFO] [server] Mode: development

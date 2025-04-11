@@ -1,62 +1,131 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button, IconButton, Box, useMediaQuery, useTheme, Menu, MenuItem } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { useTranslation } from 'react-i18next';
 
-const Header = ({ toggleSidebar }) => {
+/**
+ * Composant Header de l'application
+ * @param {Object} props - Propriétés du composant
+ * @param {boolean} props.isOpen - État d'ouverture du menu latéral
+ * @param {Function} props.toggleSidebar - Fonction pour basculer le menu latéral
+ * @param {boolean} props.isDarkMode - État du mode sombre
+ * @param {Function} props.toggleTheme - Fonction pour basculer le thème
+ */
+const Header = ({ isOpen, toggleSidebar, isDarkMode, toggleTheme }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const menuItems = [
+    { label: t('header.dashboard'), path: '/' },
+    { label: t('header.results'), path: '/draws' },
+    { label: t('header.predictions'), path: '/predictions' },
+    { label: t('header.statistics'), path: '/statistics' },
+    { label: t('header.savedGrids'), path: '/saved-grids' },
+    { label: t('header.settings'), path: '/settings' }
+  ];
+  
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-      <div className="px-4 py-3 flex items-center justify-between">
-        {/* Mobile menu button */}
-        <button
+    <AppBar position="fixed" sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}>
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
           onClick={toggleSidebar}
-          className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none"
+          sx={{ marginRight: 2 }}
         >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-
-        {/* Logo/Title - hidden on mobile when sidebar is open */}
-        <div className="md:hidden">
-          <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
-            EuroMillions Analyzer
+          <MenuIcon />
+        </IconButton>
+        
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            EuroMillions App
           </Link>
-        </div>
-
-        {/* Right side navigation items */}
-        <div className="flex items-center space-x-4">
-          {/* Profile dropdown (optional) */}
-          <div className="relative">
-            <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <span className="sr-only">{t('openUserMenu')}</span>
-              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+        </Typography>
+        
+        {isMobile ? (
+          <>
+            <IconButton
+              color="inherit"
+              onClick={toggleTheme}
+              aria-label={isDarkMode ? 'switch to light mode' : 'switch to dark mode'}
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+            
+            <IconButton
+              color="inherit"
+              aria-label="menu"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+            >
+              <MenuIcon />
+            </IconButton>
+            
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={open}
+              onClose={handleClose}
+            >
+              {menuItems.map((item) => (
+                <MenuItem key={item.path} onClick={handleClose} component={Link} to={item.path}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {menuItems.map((item) => (
+              <Button
+                key={item.path}
+                color="inherit"
+                component={Link}
+                to={item.path}
+                sx={{ mx: 1 }}
+              >
+                {item.label}
+              </Button>
+            ))}
+            
+            <IconButton
+              color="inherit"
+              onClick={toggleTheme}
+              aria-label={isDarkMode ? 'switch to light mode' : 'switch to dark mode'}
+              sx={{ ml: 2 }}
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Box>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 };
 

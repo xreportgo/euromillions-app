@@ -1,238 +1,147 @@
-const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
-const dbPath = path.join(__dirname, '../db/euromillions.sqlite');
+// backend/controllers/drawController.js - Correction
 
-// Fonction utilitaire pour obtenir une connexion à la base de données
-const getDb = () => new sqlite3.Database(dbPath);
+const AppError = require('../utils/AppError');
+const logger = require('../utils/logger');
+const dbService = require('../services/dbService');
 
 /**
- * Récupère tous les tirages
+ * Récupère tous les tirages avec pagination
  */
-const getAllDraws = (req, res) => {
-  const db = getDb();
-  
-  db.all('SELECT * FROM draws ORDER BY date(draw_date) DESC', [], (err, rows) => {
-    db.close();
+exports.getAllDraws = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
     
-    if (err) {
-      console.error('Erreur lors de la récupération des tirages:', err.message);
-      return res.status(500).json({ error: 'Erreur lors de la récupération des tirages' });
-    }
+    const db = await dbService.getDb();
     
-    // Formater les résultats
-    const draws = rows.map(row => ({
-      id: row.id,
-      date: row.draw_date,
-      numbers: row.numbers.split(',').map(num => parseInt(num, 10)),
-      stars: row.stars.split(',').map(star => parseInt(star, 10)),
-      jackpot: row.jackpot,
-      winners: row.jackpot_winners
-    }));
+    // Récupérer le nombre total de tirages
+    const countResult = await db.get("SELECT COUNT(*) as total FROM draws");
+    const total = countResult.total;
     
-    res.json({ draws });
-  });
+    // Récupérer les tirages avec pagination
+    const draws = await db.all(
+      "SELECT * FROM draws ORDER BY date(date) DESC LIMIT ? OFFSET ?", 
+      [limit, offset]
+    );
+    
+    // Calculer la pagination
+    const totalPages = Math.ceil(total / limit);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
+    
+    res.json({
+      data: draws.map(draw => ({
+        id: draw.id,
+        date: draw.date,
+        numbers: draw.numbers.split(',').map(num => parseInt(num.trim(), 10)),
+        stars: draw.stars.split(',').map(star => parseInt(star.trim(), 10)),
+        jackpot: draw.jackpot || '',
+        winners: draw.winners || '0'
+      })),
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext,
+        hasPrev
+      }
+    });
+  } catch (error) {
+    logger.error('Erreur lors de la récupération des tirages:', error);
+    return next(new AppError('Erreur lors de la récupération des tirages', 500));
+  }
 };
 
 /**
  * Récupère le dernier tirage
  */
-const getLatestDraw = (req, res) => {
-  const db = getDb();
-  
-  db.get('SELECT * FROM draws ORDER BY date(draw_date) DESC LIMIT 1', [], (err, row) => {
-    db.close();
+exports.getLatestDraw = async (req, res, next) => {
+  try {
+    const db = await dbService.getDb();
     
-    if (err) {
-      console.error('Erreur lors de la récupération du dernier tirage:', err.message);
-      return res.status(500).json({ error: 'Erreur lors de la récupération du dernier tirage' });
+    const draw = await db.get("SELECT * FROM draws ORDER BY date(date) DESC LIMIT 1");
+    
+    if (!draw) {
+      return next(new AppError('Aucun tirage trouvé', 404));
     }
     
-    if (!row) {
-      return res.status(404).json({ error: 'Aucun tirage trouvé' });
+    res.json({
+      id: draw.id,
+      date: draw.date,
+      numbers: draw.numbers.split(',').map(num => parseInt(num.trim(), 10)),
+      stars: draw.stars.split(',').map(star => parseInt(star.trim(), 10)),
+      jackpot: draw.jackpot || '',
+      winners: draw.winners || '0'
+    });
+  } catch (error) {
+    logger.error('Erreur lors de la récupération du dernier tirage:', error);
+    return next(new AppError('Erreur lors de la récupération du dernier tirage', 500));
+  }
+};
+
+/**
+ * Récupère un tirage par son ID
+ */
+exports.getDrawById = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+      return next(new AppError('ID invalide', 400));
     }
     
-    // Formater le résultat
-    const draw = {
-      id: row.id,
-      date: row.draw_date,
-      numbers: row.numbers.split(',').map(num => parseInt(num, 10)),
-      stars: row.stars.split(',').map(star => parseInt(star, 10)),
-      jackpot: row.jackpot,
-      winners: row.jackpot_winners
-    };
+    const db = await dbService.getDb();
+    const draw = await db.get("SELECT * FROM draws WHERE id = ?", [id]);
     
-    res.json(draw);
-  });
+    if (!draw) {
+      return next(new AppError(`Aucun tirage trouvé avec l'ID ${id}`, 404));
+    }
+    
+    res.json({
+      id: draw.id,
+      date: draw.date,
+      numbers: draw.numbers.split(',').map(num => parseInt(num.trim(), 10)),
+      stars: draw.stars.split(',').map(star => parseInt(star.trim(), 10)),
+      jackpot: draw.jackpot || '',
+      winners: draw.winners || '0'
+    });
+  } catch (error) {
+    logger.error(`Erreur lors de la récupération du tirage ${req.params.id}:`, error);
+    return next(new AppError('Erreur lors de la récupération du tirage', 500));
+  }
 };
 
 /**
  * Récupère un tirage par sa date
  */
-const getDrawByDate = (req, res) => {
-  const { date } = req.params;
-  const db = getDb();
-  
-  db.get('SELECT * FROM draws WHERE draw_date = ?', [date], (err, row) => {
-    db.close();
+exports.getDrawByDate = async (req, res, next) => {
+  try {
+    const date = req.params.date;
     
-    if (err) {
-      console.error(`Erreur lors de la récupération du tirage du ${date}:`, err.message);
-      return res.status(500).json({ error: `Erreur lors de la récupération du tirage du ${date}` });
+    // Vérification du format de date (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return next(new AppError('Format de date invalide. Utilisez YYYY-MM-DD', 400));
     }
     
-    if (!row) {
-      return res.status(404).json({ error: `Aucun tirage trouvé pour la date ${date}` });
-    }
+    const db = await dbService.getDb();
+    const draw = await db.get("SELECT * FROM draws WHERE date = ?", [date]);
     
-    // Formater le résultat
-    const draw = {
-      id: row.id,
-      date: row.draw_date,
-      numbers: row.numbers.split(',').map(num => parseInt(num, 10)),
-      stars: row.stars.split(',').map(star => parseInt(star, 10)),
-      jackpot: row.jackpot,
-      winners: row.jackpot_winners
-    };
-    
-    res.json(draw);
-  });
-};
-
-/**
- * Ajoute un nouveau tirage
- */
-const addDraw = (req, res) => {
-  const { date, numbers, stars, jackpot, winners } = req.body;
-  
-  // Validation des données
-  if (!date || !numbers || !stars) {
-    return res.status(400).json({ error: 'Les champs date, numbers et stars sont obligatoires' });
-  }
-  
-  // Conversion des tableaux en chaînes
-  const numbersStr = numbers.join(',');
-  const starsStr = stars.join(',');
-  
-  const db = getDb();
-  
-  const sql = `
-    INSERT INTO draws (draw_date, numbers, stars, jackpot, jackpot_winners)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  
-  db.run(sql, [date, numbersStr, starsStr, jackpot || null, winners || null], function(err) {
-    db.close();
-    
-    if (err) {
-      console.error(`Erreur lors de l'ajout du tirage:`, err.message);
-      return res.status(500).json({ error: "Erreur lors de l'ajout du tirage" });
-    }
-    
-    res.status(201).json({
-      id: this.lastID,
-      date,
-      numbers,
-      stars,
-      jackpot,
-      winners
-    });
-  });
-};
-
-/**
- * Met à jour un tirage existant
- */
-const updateDraw = (req, res) => {
-  const { id } = req.params;
-  const { date, numbers, stars, jackpot, winners } = req.body;
-  
-  const updates = [];
-  const params = [];
-  
-  if (date) {
-    updates.push('draw_date = ?');
-    params.push(date);
-  }
-  
-  if (numbers) {
-    updates.push('numbers = ?');
-    params.push(numbers.join(','));
-  }
-  
-  if (stars) {
-    updates.push('stars = ?');
-    params.push(stars.join(','));
-  }
-  
-  if (jackpot !== undefined) {
-    updates.push('jackpot = ?');
-    params.push(jackpot);
-  }
-  
-  if (winners !== undefined) {
-    updates.push('jackpot_winners = ?');
-    params.push(winners);
-  }
-  
-  if (updates.length === 0) {
-    return res.status(400).json({ error: 'Aucune donnée fournie pour la mise à jour' });
-  }
-  
-  const db = getDb();
-  
-  // Ajouter l'ID à la fin des paramètres
-  params.push(id);
-  
-  const sql = `UPDATE draws SET ${updates.join(', ')} WHERE id = ?`;
-  
-  db.run(sql, params, function(err) {
-    db.close();
-    
-    if (err) {
-      console.error(`Erreur lors de la mise à jour du tirage (ID: ${id}):`, err.message);
-      return res.status(500).json({ error: 'Erreur lors de la mise à jour du tirage' });
-    }
-    
-    if (this.changes === 0) {
-      return res.status(404).json({ error: `Aucun tirage trouvé avec l'ID ${id}` });
+    if (!draw) {
+      return next(new AppError(`Aucun tirage trouvé pour la date ${date}`, 404));
     }
     
     res.json({
-      id: parseInt(id),
-      message: `Tirage (ID: ${id}) mis à jour avec succès`,
-      changes: this.changes
+      id: draw.id,
+      date: draw.date,
+      numbers: draw.numbers.split(',').map(num => parseInt(num.trim(), 10)),
+      stars: draw.stars.split(',').map(star => parseInt(star.trim(), 10)),
+      jackpot: draw.jackpot || '',
+      winners: draw.winners || '0'
     });
-  });
-};
-
-/**
- * Supprime un tirage
- */
-const deleteDraw = (req, res) => {
-  const { id } = req.params;
-  const db = getDb();
-  
-  db.run('DELETE FROM draws WHERE id = ?', [id], function(err) {
-    db.close();
-    
-    if (err) {
-      console.error(`Erreur lors de la suppression du tirage (ID: ${id}):`, err.message);
-      return res.status(500).json({ error: 'Erreur lors de la suppression du tirage' });
-    }
-    
-    if (this.changes === 0) {
-      return res.status(404).json({ error: `Aucun tirage trouvé avec l'ID ${id}` });
-    }
-    
-    res.json({ message: `Tirage (ID: ${id}) supprimé avec succès` });
-  });
-};
-
-module.exports = {
-  getAllDraws,
-  getLatestDraw,
-  getDrawByDate,
-  addDraw,
-  updateDraw,
-  deleteDraw
+  } catch (error) {
+    logger.error(`Erreur lors de la récupération du tirage pour la date ${req.params.date}:`, error);
+    return next(new AppError('Erreur lors de la récupération du tirage', 500));
+  }
 };

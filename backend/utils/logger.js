@@ -1,38 +1,73 @@
+// backend/utils/logger.js
+/**
+ * Module de logging centralisé
+ */
 const winston = require('winston');
 const path = require('path');
+const fs = require('fs');
 
-// Configuration du format de log
+// Créer le répertoire des logs s'il n'existe pas
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// Configuration du format
 const logFormat = winston.format.combine(
-  winston.format.timestamp(),
-  winston.format.printf(({ timestamp, level, message }) => {
-    return `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+  winston.format.timestamp({
+    format: 'YYYY-MM-DD HH:mm:ss'
+  }),
+  winston.format.errors({ stack: true }),
+  winston.format.splat(),
+  winston.format.printf(({ timestamp, level, message, stack }) => {
+    return `${timestamp} [${level}]: ${message} ${stack || ''}`;
   })
 );
 
 // Création du logger
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
   format: logFormat,
+  defaultMeta: { service: 'euromillions-app' },
   transports: [
-    // Console logs
-    new winston.transports.Console(),
     // Fichier pour tous les logs
     new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/combined.log') 
+      filename: path.join(logsDir, 'app.log'),
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
     }),
-    // Fichier séparé pour les erreurs
+    // Fichier spécifique pour les erreurs
     new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/error.log'), 
-      level: 'error' 
+      filename: path.join(logsDir, 'error.log'),
+      level: 'error',
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
     })
   ]
 });
 
-// Création du répertoire logs s'il n'existe pas
-const fs = require('fs');
-const logDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+// En développement, également afficher dans la console
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    )
+  }));
 }
 
-module.exports = logger;
+// Version minimaliste pour éviter les erreurs si winston n'est pas installé
+const fallbackLogger = {
+  info: (message) => console.log(`[INFO] ${message}`),
+  error: (message, error) => console.error(`[ERROR] ${message}`, error),
+  warn: (message) => console.warn(`[WARN] ${message}`),
+  debug: (message) => console.debug(`[DEBUG] ${message}`)
+};
+
+// Exporter le logger ou une version de fallback
+try {
+  module.exports = logger;
+} catch (error) {
+  console.warn('Winston logger initialization failed, using fallback logger');
+  module.exports = fallbackLogger;
+}

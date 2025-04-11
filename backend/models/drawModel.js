@@ -1,81 +1,18 @@
-const path = require('path');
-const fs = require('fs');
-const winston = require('winston');
-const database = require('../db/database');
+/**
+ * Modèle pour gérer les tirages EuroMillions dans la base de données
+ */
 
-// Création du logger pour le modèle de tirage
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] [${level.toUpperCase()}] [drawModel] ${message}`;
-    })
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/models.log') 
-    })
-  ]
-});
-
-// Assurez-vous que le répertoire logs existe
-const logDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
+const { format } = require('date-fns');
+const db = require('../db'); // Adapter selon votre structure
+const logger = require('../utils/logger'); // Adapter selon votre structure
 
 /**
- * Récupère tous les tirages de la base de données
- * @returns {Promise<Array>} Liste des tirages
+ * Récupère le dernier tirage depuis la base de données
+ * @returns {Promise<Object|null>} - Le dernier tirage ou null si aucun
  */
-async function getAllDraws() {
+async function getLatestDraw() {
   try {
-    const rows = await database.all(`
-      SELECT * FROM draws
-      ORDER BY date(draw_date) DESC
-    `);
-    
-    return rows.map(formatDrawFromDb);
-  } catch (error) {
-    logger.error(`Erreur lors de la récupération des tirages: ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Récupère un tirage par sa date
- * @param {string} date - Date du tirage au format YYYY-MM-DD
- * @returns {Promise<Object>} Tirage trouvé ou null
- */
-async function getDrawByDate(date) {
-  try {
-    const row = await database.get(`
-      SELECT * FROM draws
-      WHERE draw_date = ?
-    `, [date]);
-    
-    return row ? formatDrawFromDb(row) : null;
-  } catch (error) {
-    logger.error(`Erreur lors de la récupération du tirage du ${date}: ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Récupère le dernier tirage
- * @returns {Promise<Object>} Dernier tirage ou null
- */
-async function getLastDraw() {
-  try {
-    const row = await database.get(`
-      SELECT * FROM draws
-      ORDER BY date(draw_date) DESC
-      LIMIT 1
-    `);
-    
-    return row ? formatDrawFromDb(row) : null;
+    return await db.draws.findOne({}, { sort: { date: -1 } });
   } catch (error) {
     logger.error(`Erreur lors de la récupération du dernier tirage: ${error.message}`);
     throw error;
@@ -83,174 +20,131 @@ async function getLastDraw() {
 }
 
 /**
- * Ajoute un nouveau tirage dans la base de données
- * @param {Object} draw - Informations du tirage
- * @returns {Promise<Object>} Tirage ajouté avec son ID
+ * Récupère un tirage par sa date
+ * @param {Date} date - La date du tirage à récupérer
+ * @returns {Promise<Object|null>} - Le tirage ou null si non trouvé
  */
-async function addDraw(draw) {
+async function getDrawByDate(date) {
   try {
-    // Vérification si le tirage existe déjà
-    const existingDraw = await getDrawByDate(draw.date);
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    return await db.draws.findOne({
+      date: {
+        $gte: targetDate,
+        $lt: new Date(targetDate.getTime() + 24*60*60*1000)
+      }
+    });
+  } catch (error) {
+    logger.error(`Erreur lors de la récupération du tirage pour la date ${format(date, 'yyyy-MM-dd')}: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Ajoute ou met à jour un tirage dans la base de données
+ * @param {Object} drawData - Les données du tirage
+ * @returns {Promise<Object>} - Résultat de l'opération
+ */
+async function addOrUpdateDraw(drawData) {
+  try {
+    // Formater la date pour la recherche
+    const drawDate = new Date(drawData.date);
+    drawDate.setHours(0, 0, 0, 0);
+    
+    // Vérifier si ce tirage existe déjà
+    const existingDraw = await db.draws.findOne({ 
+      date: {
+        $gte: drawDate,
+        $lt: new Date(drawDate.getTime() + 24*60*60*1000)
+      }
+    });
+    
     if (existingDraw) {
-      logger.info(`Le tirage du ${draw.date} existe déjà, mise à jour...`);
-      return await updateDraw(existingDraw.id, draw);
-    }
-    
-    // Conversion des arrays en strings pour la DB
-    const numbersStr = draw.numbers.join(',');
-    const starsStr = draw.stars.join(',');
-    
-    const result = await database.run(`
-      INSERT INTO draws (draw_date, numbers, stars, jackpot, jackpot_winners)
-      VALUES (?, ?, ?, ?, ?)
-    `, [
-      draw.date,
-      numbersStr,
-      starsStr,
-      draw.jackpot || null,
-      draw.winners || null
-    ]);
-    
-    logger.info(`Tirage du ${draw.date} ajouté avec succès (ID: ${result.lastID})`);
-    
-    return {
-      id: result.lastID,
-      ...draw
-    };
-  } catch (error) {
-    logger.error(`Erreur lors de l'ajout du tirage: ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Met à jour un tirage existant
- * @param {number} id - ID du tirage à mettre à jour
- * @param {Object} draw - Nouvelles informations du tirage
- * @returns {Promise<Object>} Tirage mis à jour
- */
-async function updateDraw(id, draw) {
-  try {
-    // Conversion des arrays en strings pour la DB
-    const numbersStr = draw.numbers.join(',');
-    const starsStr = draw.stars.join(',');
-    
-    await database.run(`
-      UPDATE draws
-      SET draw_date = ?,
-          numbers = ?,
-          stars = ?,
-          jackpot = ?,
-          jackpot_winners = ?
-      WHERE id = ?
-    `, [
-      draw.date,
-      numbersStr,
-      starsStr,
-      draw.jackpot || null,
-      draw.winners || null,
-      id
-    ]);
-    
-    logger.info(`Tirage du ${draw.date} (ID: ${id}) mis à jour avec succès`);
-    
-    return {
-      id,
-      ...draw
-    };
-  } catch (error) {
-    logger.error(`Erreur lors de la mise à jour du tirage (ID: ${id}): ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Supprime un tirage de la base de données
- * @param {number} id - ID du tirage à supprimer
- * @returns {Promise<boolean>} True si supprimé avec succès
- */
-async function deleteDraw(id) {
-  try {
-    const result = await database.run(`
-      DELETE FROM draws
-      WHERE id = ?
-    `, [id]);
-    
-    if (result.changes > 0) {
-      logger.info(`Tirage (ID: ${id}) supprimé avec succès`);
-      return true;
+      // Mise à jour du tirage existant
+      logger.info(`Mise à jour du tirage existant du ${format(drawDate, 'yyyy-MM-dd')}`);
+      
+      const updateResult = await db.draws.updateOne(
+        { _id: existingDraw._id },
+        { $set: {
+          numbers: drawData.numbers,
+          stars: drawData.stars,
+          jackpot: drawData.jackpot || existingDraw.jackpot,
+          winners: drawData.winners || existingDraw.winners,
+          updated_at: new Date()
+        }}
+      );
+      
+      return { updated: true, id: existingDraw._id };
     } else {
-      logger.warn(`Aucun tirage trouvé avec l'ID: ${id}`);
-      return false;
+      // Ajouter un nouveau tirage
+      logger.info(`Ajout d'un nouveau tirage pour le ${format(drawDate, 'yyyy-MM-dd')}`);
+      
+      const newDraw = {
+        date: drawDate,
+        numbers: drawData.numbers,
+        stars: drawData.stars,
+        jackpot: drawData.jackpot || 0,
+        winners: drawData.winners || 0,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      
+      const insertResult = await db.draws.insertOne(newDraw);
+      return { inserted: true, id: insertResult.insertedId };
     }
-  } catch (error) {
-    logger.error(`Erreur lors de la suppression du tirage (ID: ${id}): ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Récupère les tirages entre deux dates
- * @param {string} startDate - Date de début au format YYYY-MM-DD
- * @param {string} endDate - Date de fin au format YYYY-MM-DD
- * @returns {Promise<Array>} Liste des tirages
- */
-async function getDrawsBetweenDates(startDate, endDate) {
-  try {
-    const rows = await database.all(`
-      SELECT * FROM draws
-      WHERE date(draw_date) BETWEEN date(?) AND date(?)
-      ORDER BY date(draw_date) DESC
-    `, [startDate, endDate]);
     
-    return rows.map(formatDrawFromDb);
   } catch (error) {
-    logger.error(`Erreur lors de la récupération des tirages entre ${startDate} et ${endDate}: ${error.message}`);
+    logger.error(`Erreur lors de l'ajout/mise à jour du tirage: ${error.message}`);
     throw error;
   }
 }
 
 /**
- * Récupère les tirages d'une année spécifique
- * @param {number} year - Année des tirages
- * @returns {Promise<Array>} Liste des tirages
+ * Récupère tous les tirages, triés par date (du plus récent au plus ancien)
+ * @param {number} limit - Nombre maximum de tirages à récupérer (0 = tous)
+ * @returns {Promise<Array>} - Liste des tirages
  */
-async function getDrawsByYear(year) {
+async function getAllDraws(limit = 0) {
   try {
-    const startDate = `${year}-01-01`;
-    const endDate = `${year}-12-31`;
+    const options = { sort: { date: -1 } };
+    if (limit > 0) options.limit = limit;
     
-    return await getDrawsBetweenDates(startDate, endDate);
+    return await db.draws.find({}, options).toArray();
   } catch (error) {
-    logger.error(`Erreur lors de la récupération des tirages de l'année ${year}: ${error.message}`);
+    logger.error(`Erreur lors de la récupération des tirages: ${error.message}`);
     throw error;
   }
 }
 
 /**
- * Formate un tirage venant de la base de données
- * @param {Object} row - Ligne de la base de données
- * @returns {Object} Tirage formaté
+ * Supprime un tirage par sa date
+ * @param {Date} date - La date du tirage à supprimer
+ * @returns {Promise<Object>} - Résultat de la suppression
  */
-function formatDrawFromDb(row) {
-  return {
-    id: row.id,
-    date: row.draw_date,
-    numbers: row.numbers.split(',').map(num => parseInt(num, 10)),
-    stars: row.stars.split(',').map(star => parseInt(star, 10)),
-    jackpot: row.jackpot,
-    winners: row.jackpot_winners,
-    createdAt: row.created_at
-  };
+async function deleteDrawByDate(date) {
+  try {
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    const result = await db.draws.deleteOne({
+      date: {
+        $gte: targetDate,
+        $lt: new Date(targetDate.getTime() + 24*60*60*1000)
+      }
+    });
+    
+    return { deleted: result.deletedCount > 0 };
+  } catch (error) {
+    logger.error(`Erreur lors de la suppression du tirage pour la date ${format(date, 'yyyy-MM-dd')}: ${error.message}`);
+    throw error;
+  }
 }
 
 module.exports = {
-  getAllDraws,
+  getLatestDraw,
   getDrawByDate,
-  getLastDraw,
-  addDraw,
-  updateDraw,
-  deleteDraw,
-  getDrawsBetweenDates,
-  getDrawsByYear
+  addOrUpdateDraw,
+  getAllDraws,
+  deleteDrawByDate
 };

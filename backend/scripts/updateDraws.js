@@ -22,43 +22,47 @@ const logger = winston.createLogger({
 // Assurez-vous que le répertoire logs existe
 const logDir = path.join(__dirname, '../logs');
 if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+  try {
+    fs.mkdirSync(logDir, { recursive: true });
+  } catch (error) {
+    logger.error(`Erreur lors de la création du dossier logs : ${error.message}`);
+  }
 }
 
 /**
  * Met à jour la base de données avec le dernier tirage EuroMillions
  */
-async function updateDraws() {
+async function updateDraw() {
   logger.info('Démarrage de la mise à jour des tirages...');
-
+  
   try {
     // Récupérer le dernier tirage
     logger.info('Récupération du dernier tirage...');
     const latestDraw = await scrapingService.fetchLatestDraw();
-
+    
     if (!latestDraw || !latestDraw.date) {
       logger.error('Impossible de récupérer le dernier tirage: données invalides');
       return { success: false, message: 'Données de tirage invalides', updated: false };
     }
-
+    
     // Vérifier s'il existe déjà dans la base de données
     const existingDraw = await drawModel.getDrawByDate(latestDraw.date);
-
+    
     if (existingDraw) {
       logger.info(`Le tirage du ${latestDraw.date} existe déjà dans la base de données.`);
       return { success: true, message: 'Aucune mise à jour nécessaire', updated: false };
     }
-
+    
     // Ajouter le nouveau tirage
     await drawModel.addDraw(latestDraw);
     logger.info(`Tirage du ${latestDraw.date} ajouté avec succès à la base de données.`);
-
+    
     // Vérifier s'il y a des tirages manquants (optionnel)
     await updateMissingDraws();
-
-    return { 
-      success: true, 
-      message: `Tirage du ${latestDraw.date} ajouté avec succès`, 
+    
+    return {
+      success: true,
+      message: `Tirage du ${latestDraw.date} ajouté avec succès`,
       updated: true,
       draw: latestDraw
     };
@@ -69,18 +73,28 @@ async function updateDraws() {
 }
 
 /**
- * Met à jour les tirages manquants dans la base de données
+ * Vérifie et ajoute les tirages manquants dans la base de données
  */
 async function updateMissingDraws() {
-  logger.info('Vérification des tirages manquants...');
-
   try {
+    logger.info('Vérification des tirages manquants...');
+    
     // Récupérer les 20 derniers tirages
     const historyDraws = await scrapingService.fetchDrawHistory(20);
     let addedCount = 0;
-
+    
+    if (!Array.isArray(historyDraws) || historyDraws.length === 0) {
+      logger.warn('Aucun historique de tirages récupéré');
+      return { success: true, addedCount: 0 };
+    }
+    
     // Pour chaque tirage de l'historique
     for (const draw of historyDraws) {
+      if (!draw || !draw.date) {
+        logger.warn('Tirage invalide détecté dans l\'historique');
+        continue;
+      }
+      
       // Vérifier s'il existe déjà
       const existingDraw = await drawModel.getDrawByDate(draw.date);
       
@@ -91,7 +105,7 @@ async function updateMissingDraws() {
         addedCount++;
       }
     }
-
+    
     logger.info(`${addedCount} tirages manquants ont été ajoutés à la base de données.`);
     return { success: true, addedCount };
   } catch (error) {
@@ -102,15 +116,18 @@ async function updateMissingDraws() {
 
 // Si exécuté directement (pas importé comme module)
 if (require.main === module) {
-  updateDraws()
+  updateDraw()
     .then(result => {
       logger.info(`Mise à jour terminée: ${JSON.stringify(result)}`);
       process.exit(0);
     })
     .catch(error => {
-      logger.error(`Erreur critique: ${error.message}`);
+      logger.error(`Erreur non gérée: ${error.message}`);
       process.exit(1);
     });
 }
 
-module.exports = { updateDraws, updateMissingDraws };
+module.exports = {
+  updateDraw,
+  updateMissingDraws
+};

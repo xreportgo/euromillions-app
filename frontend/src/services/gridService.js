@@ -1,132 +1,242 @@
 // src/services/gridService.js
-import apiClient from './apiService';
+import axios from 'axios';
 
-export const generateGrids = async (params) => {
+// Configuration pour l'API
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+
+// Clé de stockage local pour les grilles
+const STORED_GRIDS_KEY = 'euromillions_saved_grids';
+
+/**
+ * Récupère toutes les grilles sauvegardées
+ * @returns {Promise<Array>} Liste des grilles sauvegardées
+ */
+export const getStoredGrids = async () => {
   try {
-    const response = await apiClient.post('/grids/generate', params);
-    
-    // Vérifier que les données ont le format attendu
-    if (!response || !Array.isArray(response)) {
-      console.error('Format de réponse inattendu:', response);
-      // Retourner un tableau vide en cas d'erreur
-      return [];
+    // Essayer d'abord de récupérer depuis l'API
+    try {
+      const response = await axios.get(`${API_BASE_URL}/grids`);
+      console.log('Grilles récupérées depuis l\'API:', response.data);
+      return response.data;
+    } catch (apiError) {
+      console.warn('Impossible de récupérer les grilles depuis l\'API, fallback sur le stockage local:', apiError);
+      // En cas d'erreur API, fallback sur le stockage local
+      const storedGrids = localStorage.getItem(STORED_GRIDS_KEY);
+      return storedGrids ? JSON.parse(storedGrids) : [];
     }
-    
-    // Vérifier chaque grille
-    const validatedGrids = response.map(grid => {
-      // Si la grille n'a pas de numéros ou d'étoiles, ajouter des valeurs par défaut
-      if (!grid.numbers) grid.numbers = [];
-      if (!grid.stars) grid.stars = [];
-      return grid;
-    });
-    
-    return validatedGrids;
-  } catch (error) {
-    console.error('Erreur lors de la génération des grilles:', error);
-    throw error;
-  }
-};
-
-export const getAllGrids = async () => {
-  try {
-    return await apiClient.get('/grids');
   } catch (error) {
     console.error('Erreur lors de la récupération des grilles:', error);
-    throw error;
+    // En cas d'erreur générale, renvoyer un tableau vide
+    return [];
   }
 };
 
-export const getGridById = async (id) => {
-  try {
-    return await apiClient.get(`/grids/${id}`);
-  } catch (error) {
-    console.error(`Erreur lors de la récupération de la grille ${id}:`, error);
-    throw error;
-  }
-};
-
+/**
+ * Sauvegarde une nouvelle grille
+ * @param {Object} grid La grille à sauvegarder
+ * @returns {Promise<Object>} La grille sauvegardée avec son ID
+ */
 export const saveGrid = async (grid) => {
   try {
-    return await apiClient.post('/grids', grid);
+    // Essayer d'abord de sauvegarder via l'API
+    try {
+      const response = await axios.post(`${API_BASE_URL}/grids`, grid);
+      console.log('Grille sauvegardée via l\'API:', response.data);
+      return response.data;
+    } catch (apiError) {
+      console.warn('Impossible de sauvegarder la grille via l\'API, fallback sur le stockage local:', apiError);
+      
+      // En cas d'erreur API, fallback sur le stockage local
+      const storedGrids = await getStoredGrids();
+      
+      // Créer une nouvelle grille avec un ID unique
+      const newGrid = {
+        ...grid,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString()
+      };
+      
+      // Ajouter la nouvelle grille à la liste
+      const updatedGrids = [...storedGrids, newGrid];
+      
+      // Sauvegarder la liste mise à jour
+      localStorage.setItem(STORED_GRIDS_KEY, JSON.stringify(updatedGrids));
+      
+      console.log('Grille sauvegardée localement:', newGrid);
+      return newGrid;
+    }
   } catch (error) {
     console.error('Erreur lors de la sauvegarde de la grille:', error);
-    throw error;
+    throw new Error('Impossible de sauvegarder la grille');
   }
 };
 
-export const updateGrid = async (id, data) => {
+/**
+ * Récupère une grille par son ID
+ * @param {string} id L'ID de la grille à récupérer
+ * @returns {Promise<Object|null>} La grille trouvée ou null
+ */
+export const getGridById = async (id) => {
   try {
-    return await apiClient.put(`/grids/${id}`, data);
+    // Essayer d'abord de récupérer depuis l'API
+    try {
+      const response = await axios.get(`${API_BASE_URL}/grids/${id}`);
+      return response.data;
+    } catch (apiError) {
+      console.warn(`Impossible de récupérer la grille ${id} depuis l\'API, fallback sur le stockage local:`, apiError);
+      
+      // En cas d'erreur API, fallback sur le stockage local
+      const storedGrids = await getStoredGrids();
+      return storedGrids.find(grid => grid.id === id) || null;
+    }
   } catch (error) {
-    console.error(`Erreur lors de la mise à jour de la grille ${id}:`, error);
-    throw error;
+    console.error(`Erreur lors de la récupération de la grille ${id}:`, error);
+    return null;
   }
 };
 
+/**
+ * Supprime une grille par son ID
+ * @param {string} id L'ID de la grille à supprimer
+ * @returns {Promise<boolean>} True si la suppression a réussi
+ */
 export const deleteGrid = async (id) => {
   try {
-    return await apiClient.delete(`/grids/${id}`);
+    // Essayer d'abord de supprimer via l'API
+    try {
+      await axios.delete(`${API_BASE_URL}/grids/${id}`);
+      return true;
+    } catch (apiError) {
+      console.warn(`Impossible de supprimer la grille ${id} via l\'API, fallback sur le stockage local:`, apiError);
+      
+      // En cas d'erreur API, fallback sur le stockage local
+      const storedGrids = await getStoredGrids();
+      const updatedGrids = storedGrids.filter(grid => grid.id !== id);
+      
+      if (updatedGrids.length === storedGrids.length) {
+        return false; // Grille non trouvée
+      }
+      
+      localStorage.setItem(STORED_GRIDS_KEY, JSON.stringify(updatedGrids));
+      return true;
+    }
   } catch (error) {
     console.error(`Erreur lors de la suppression de la grille ${id}:`, error);
-    throw error;
+    throw new Error('Impossible de supprimer la grille');
   }
 };
 
-export const exportGrids = async (format = 'csv', ids = null) => {
+/**
+ * Met à jour une grille existante
+ * @param {string} id L'ID de la grille à mettre à jour
+ * @param {Object} updatedGrid Les nouvelles données de la grille
+ * @returns {Promise<Object>} La grille mise à jour
+ */
+export const updateGrid = async (id, updatedGrid) => {
   try {
-    let url = `/grids/export?format=${format}`;
-    if (ids && ids.length > 0) {
-      url += `&ids=${ids.join(',')}`;
+    // Essayer d'abord de mettre à jour via l'API
+    try {
+      const response = await axios.put(`${API_BASE_URL}/grids/${id}`, updatedGrid);
+      return response.data;
+    } catch (apiError) {
+      console.warn(`Impossible de mettre à jour la grille ${id} via l\'API, fallback sur le stockage local:`, apiError);
+      
+      // En cas d'erreur API, fallback sur le stockage local
+      const storedGrids = await getStoredGrids();
+      const existingGridIndex = storedGrids.findIndex(grid => grid.id === id);
+      
+      if (existingGridIndex === -1) {
+        throw new Error(`Grille avec l'ID ${id} non trouvée`);
+      }
+      
+      const gridToUpdate = {
+        ...storedGrids[existingGridIndex],
+        ...updatedGrid,
+        updatedAt: new Date().toISOString()
+      };
+      
+      const updatedGrids = [...storedGrids];
+      updatedGrids[existingGridIndex] = gridToUpdate;
+      
+      localStorage.setItem(STORED_GRIDS_KEY, JSON.stringify(updatedGrids));
+      
+      return gridToUpdate;
     }
-    return await apiClient.get(url, { responseType: 'blob' });
   } catch (error) {
-    console.error('Erreur lors de l\'export des grilles:', error);
-    throw error;
+    console.error(`Erreur lors de la mise à jour de la grille ${id}:`, error);
+    throw new Error('Impossible de mettre à jour la grille');
   }
 };
 
-export const printGrid = (grid) => {
-  // Créer une nouvelle fenêtre pour l'impression
-  const printWindow = window.open('', '_blank');
+/**
+ * Vérifie une grille par rapport au dernier tirage
+ * @param {Object} grid La grille à vérifier
+ * @param {Object} draw Le tirage à comparer
+ * @returns {Object} Résultats de la vérification
+ */
+export const checkGrid = (grid, draw) => {
+  if (!grid || !draw || !grid.numbers || !grid.stars || !draw.numbers || !draw.stars) {
+    return {
+      matchedNumbers: [],
+      matchedStars: [],
+      totalMatched: 0,
+      prize: 0
+    };
+  }
   
-  // Appliquer un style pour l'impression
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Grille Euromillions</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          .grid-container { border: 1px solid #ccc; padding: 15px; max-width: 400px; margin: 0 auto; }
-          .grid-name { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-          .numbers-container { display: flex; justify-content: center; margin-bottom: 10px; }
-          .stars-container { display: flex; justify-content: center; }
-          .ball { display: inline-flex; align-items: center; justify-content: center; 
-                 width: 40px; height: 40px; border-radius: 50%; margin: 0 5px; 
-                 font-weight: bold; color: white; }
-          .number { background-color: #004b9f; }
-          .star { background-color: #fc0; color: #333; }
-          .footer { margin-top: 15px; font-size: 12px; text-align: center; color: #666; }
-        </style>
-      </head>
-      <body>
-        <div class="grid-container">
-          <div class="grid-name">${grid.name || 'Grille Euromillions'}</div>
-          <div class="numbers-container">
-            ${grid.numbers.map(num => `<div class="ball number">${num}</div>`).join('')}
-          </div>
-          <div class="stars-container">
-            ${grid.stars.map(star => `<div class="ball star">${star}</div>`).join('')}
-          </div>
-          <div class="footer">Imprimé le ${new Date().toLocaleDateString()}</div>
-        </div>
-      </body>
-    </html>
-  `);
+  const matchedNumbers = grid.numbers.filter(number => 
+    draw.numbers.includes(number)
+  );
   
-  // Fermer le document et lancer l'impression
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(() => {
-    printWindow.print();
-  }, 250);
+  const matchedStars = grid.stars.filter(star =>
+    draw.stars.includes(star)
+  );
+  
+  const totalMatched = matchedNumbers.length + matchedStars.length;
+  
+  // Calcul simplifié des gains (à adapter selon les règles réelles)
+  let prize = 0;
+  if (matchedNumbers.length === 5 && matchedStars.length === 2) {
+    prize = 'Jackpot';
+  } else if (matchedNumbers.length === 5 && matchedStars.length === 1) {
+    prize = '500 000 €';
+  } else if (matchedNumbers.length === 5) {
+    prize = '50 000 €';
+  } else if (matchedNumbers.length === 4 && matchedStars.length === 2) {
+    prize = '5 000 €';
+  } else if (matchedNumbers.length === 4 && matchedStars.length === 1) {
+    prize = '500 €';
+  } else if (matchedNumbers.length === 3 && matchedStars.length === 2) {
+    prize = '100 €';
+  } else if (matchedNumbers.length === 4) {
+    prize = '50 €';
+  } else if (matchedNumbers.length === 2 && matchedStars.length === 2) {
+    prize = '20 €';
+  } else if (matchedNumbers.length === 3 && matchedStars.length === 1) {
+    prize = '15 €';
+  } else if (matchedNumbers.length === 3) {
+    prize = '10 €';
+  } else if (matchedNumbers.length === 1 && matchedStars.length === 2) {
+    prize = '10 €';
+  } else if (matchedNumbers.length === 2 && matchedStars.length === 1) {
+    prize = '8 €';
+  } else if (matchedNumbers.length === 2) {
+    prize = '4 €';
+  }
+  
+  return {
+    matchedNumbers,
+    matchedStars,
+    totalMatched,
+    prize
+  };
+};
+
+export default {
+  getStoredGrids,
+  saveGrid,
+  getGridById,
+  deleteGrid,
+  updateGrid,
+  checkGrid
 };

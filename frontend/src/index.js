@@ -1,20 +1,32 @@
-// src/index.js
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { Provider } from 'react-redux';
-import store from './redux/store';
 import { BrowserRouter } from 'react-router-dom';
-import './i18n'; // Assurez-vous que le fichier i18n existe
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
-ReactDOM.render(
+// Thème sombre par défaut
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#90caf9',
+    },
+    secondary: {
+      main: '#f48fb1',
+    },
+  },
+});
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
         <App />
-      </BrowserRouter>
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
+      </ThemeProvider>
+    </BrowserRouter>
+  </React.StrictMode>
 );

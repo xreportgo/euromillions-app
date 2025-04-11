@@ -1,0 +1,27 @@
+[2025-04-10T01:01:21.259Z] [ERROR] Erreur lors de l'initialisation de la table des grilles: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:01:21.260Z] [ERROR] Erreur d'initialisation: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:15:27.663Z] [ERROR] Erreur lors de l'initialisation de la table des grilles: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:15:27.663Z] [ERROR] Erreur d'initialisation: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:28:44.483Z] [ERROR] Erreur d'initialisation: fs is not defined
+[2025-04-10T01:28:44.484Z] [ERROR] Erreur lors de l'initialisation de la table des grilles: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:28:44.484Z] [ERROR] Erreur d'initialisation: SQLITE_CANTOPEN: unable to open database file
+[2025-04-10T01:33:13.051Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T01:33:13.059Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T01:53:30.662Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T01:53:30.677Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T02:04:53.097Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T02:04:53.097Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T02:10:49.522Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T02:10:49.536Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T02:16:04.062Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T02:16:04.067Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T12:51:58.229Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T12:51:58.241Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:34:59.094Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:34:59.095Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:39:43.273Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:39:43.273Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:44:57.339Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:44:57.340Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:48:32.028Z] [INFO] Table des grilles initialisée avec succès
+[2025-04-10T13:48:32.028Z] [INFO] Table des grilles initialisée avec succès

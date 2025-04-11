@@ -3,9 +3,9 @@
 # Script d'installation des tâches CRON pour l'application EuroMillions
 
 # Définir les variables
-APP_DIR=$(pwd)
-CRON_FILE="$APP_DIR/config/euromillions-cron.conf"
-SCRIPT_PATH="$APP_DIR/scripts/cron/update_euromillions.sh"
+APP_DIR="$(dirname "$(readlink -f "$0")")"  # Chemin absolu du répertoire contenant le script
+CRON_FILE="$APP_DIR/backend/config/euromillions-cron.conf"
+SCRIPT_PATH="$APP_DIR/backend/scripts/cron/update_euromillions.sh"
 
 # Vérifier que le script existe et est exécutable
 if [ ! -f "$SCRIPT_PATH" ]; then

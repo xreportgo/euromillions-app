@@ -38,3 +38,43 @@
 [2025-04-07T20:09:17.933Z] [INFO] [database] Table statistics vérifiée/créée avec succès
 [2025-04-07T20:49:07.812Z] [INFO] [initDb] Démarrage de l'initialisation de la base de données
 [2025-04-07T20:49:07.814Z] [ERROR] [initDb] Erreur lors de l'initialisation: logger.error is not a function
+2025-04-11 00:48:30 [info]: Connexion établie avec la base de données: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 00:48:30 [info]: Structure de la base de données vérifiée 
+2025-04-11 00:48:30 [info]: Serveur démarré sur le port 5000 
+2025-04-11 00:48:30 [info]: Mode: development 
+2025-04-11 00:50:16 [error]: ERREUR 404: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html' Error: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html'
+2025-04-11 00:50:17 [error]: ERREUR 404: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html' Error: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html'
+2025-04-11 00:50:17 [error]: ERREUR 404: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html' Error: ENOENT: no such file or directory, stat 'C:\Users\Rga\Desktop\HelloEuro\euromillions-app\frontend\build\index.html'
+2025-04-11 00:56:27 [info]: Arrêt du serveur... 
+2025-04-11 00:56:27 [info]: Connexion à la base de données fermée 
+2025-04-11 00:56:31 [info]: Connexion établie avec la base de données: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 00:56:31 [info]: Structure de la base de données vérifiée 
+2025-04-11 00:56:31 [info]: Serveur démarré sur le port 5000 
+2025-04-11 00:56:31 [info]: Mode: development 
+2025-04-11 01:01:45 [info]: Arrêt du serveur... 
+2025-04-11 01:01:45 [info]: Connexion à la base de données fermée 
+2025-04-11 01:01:49 [info]: Connexion établie avec la base de données: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 01:01:49 [info]: Structure de la base de données vérifiée 
+2025-04-11 01:01:49 [info]: Serveur démarré sur le port 5000 
+2025-04-11 01:01:49 [info]: Mode: development 
+2025-04-11 01:45:54 [info]: Arrêt du serveur... 
+2025-04-11 01:45:54 [info]: Connexion à la base de données fermée 
+2025-04-11 01:46:08 [info]: Base de données existante trouvée: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 01:46:08 [info]: Connexion établie avec la base de données: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 01:46:08 [info]: Base de données contient 1831 tirages 
+2025-04-11 01:46:08 [info]: Serveur démarré sur le port 5000 
+2025-04-11 01:46:08 [info]: Mode: development 
+2025-04-11 01:51:37 [info]: Arrêt du serveur... 
+2025-04-11 01:51:37 [info]: Connexion à la base de données fermée 
+2025-04-11 02:36:11 [info]: Base de données existante trouvée: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 02:36:11 [info]: Connexion établie avec la base de données: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 02:36:11 [info]: Base de données contient 1831 tirages 
+2025-04-11 02:36:11 [info]: Serveur démarré sur le port 5000 
+2025-04-11 02:36:11 [info]: Mode: development 
+2025-04-11 02:41:25 [info]: Base de données existante trouvée: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 02:41:25 [info]: Connexion établie avec la base de données: C:\Users\Rga\Desktop\HelloEuro\euromillions-app\backend\db\euromillions.sqlite 
+2025-04-11 02:41:25 [info]: Base de données contient 1831 tirages 
+2025-04-11 02:41:25 [info]: Serveur démarré sur le port 5000 
+2025-04-11 02:41:25 [info]: Mode: development 
+2025-04-11 02:41:37 [info]: Arrêt du serveur... 
+2025-04-11 02:41:37 [info]: Connexion à la base de données fermée 

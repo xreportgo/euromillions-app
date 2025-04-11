@@ -1,0 +1,242 @@
+[
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\controllers\\drawController.js",
+    "matches": [
+      {
+        "line": 33,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 70,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 102,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 135,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\controllers\\grilleController.js",
+    "matches": [
+      {
+        "line": 15,
+        "content": "res.json({ success: true, grilles });",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 46,
+        "content": "res.json({ success: true, grille: newGrille });",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 76,
+        "content": "res.json({ success: true, message: 'Grille supprimée avec succès' });",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\controllers\\predictionController.js",
+    "matches": [
+      {
+        "line": 72,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\controllers\\statsController.js",
+    "matches": [
+      {
+        "line": 16,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 34,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 52,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 70,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\findFakeData.js",
+    "matches": [
+      {
+        "line": 6,
+        "content": "const fakeDataPatterns = [",
+        "pattern": "/fakeData/"
+      },
+      {
+        "line": 20,
+        "content": "/return\\s*mockData/,",
+        "pattern": "/mockData/"
+      },
+      {
+        "line": 21,
+        "content": "/mockData/,",
+        "pattern": "/mockData/"
+      },
+      {
+        "line": 22,
+        "content": "/fakeData/,",
+        "pattern": "/fakeData/"
+      },
+      {
+        "line": 23,
+        "content": "/dummyData/,",
+        "pattern": "/dummyData/"
+      },
+      {
+        "line": 24,
+        "content": "/testData/",
+        "pattern": "/testData/"
+      },
+      {
+        "line": 83,
+        "content": "const matches = searchPatterns(filePath, fakeDataPatterns);",
+        "pattern": "/fakeData/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\routes\\index.js",
+    "matches": [
+      {
+        "line": 40,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 53,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\routes\\statsRoutes.js",
+    "matches": [
+      {
+        "line": 11,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 20,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 29,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 38,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\backend\\scripts\\force_real_data.js",
+    "matches": [
+      {
+        "line": 45,
+        "content": "app.get('/api/draws/latest', (req, res) => {",
+        "pattern": "/app\\.get\\s*\\(['\"]\\/*api\\/draws/"
+      },
+      {
+        "line": 61,
+        "content": "app.get('/api/draws', (req, res) => {",
+        "pattern": "/app\\.get\\s*\\(['\"]\\/*api\\/draws/"
+      },
+      {
+        "line": 82,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      },
+      {
+        "line": 98,
+        "content": "app.get('/api/draws/date/:date', (req, res) => {",
+        "pattern": "/app\\.get\\s*\\(['\"]\\/*api\\/draws/"
+      },
+      {
+        "line": 116,
+        "content": "app.get('/api/predictions', (req, res) => {",
+        "pattern": "/app\\.get\\s*\\(['\"]\\/*api\\/predictions/"
+      },
+      {
+        "line": 146,
+        "content": "res.json({",
+        "pattern": "/res\\.json\\s*\\(\\s*\\{/"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\Rga\\Desktop\\HelloEuro\\euromillions-app\\frontend\\src\\utils\\tests\\drawUtils.test.js",
+    "matches": [
+      {
+        "line": 11,
+        "content": "jackpot: '€17,000,000',",
+        "pattern": "/jackpot\\s*:\\s*['\"]\\€17,000,000['\"]/"
+      },
+      {
+        "line": 12,
+        "content": "winners: '0'",
+        "pattern": "/winners\\s*:\\s*['\"]0['\"]/"
+      },
+      {
+        "line": 20,
+        "content": "jackpot: '€17,000,000',",
+        "pattern": "/jackpot\\s*:\\s*['\"]\\€17,000,000['\"]/"
+      },
+      {
+        "line": 21,
+        "content": "winners: '0'",
+        "pattern": "/winners\\s*:\\s*['\"]0['\"]/"
+      },
+      {
+        "line": 37,
+        "content": "jackpot: '€17,000,000',",
+        "pattern": "/jackpot\\s*:\\s*['\"]\\€17,000,000['\"]/"
+      },
+      {
+        "line": 38,
+        "content": "winners: '0'",
+        "pattern": "/winners\\s*:\\s*['\"]0['\"]/"
+      },
+      {
+        "line": 58,
+        "content": "jackpot: '€17,000,000',",
+        "pattern": "/jackpot\\s*:\\s*['\"]\\€17,000,000['\"]/"
+      },
+      {
+        "line": 59,
+        "content": "winners: '0'",
+        "pattern": "/winners\\s*:\\s*['\"]0['\"]/"
+      }
+    ]
+  }
+]
